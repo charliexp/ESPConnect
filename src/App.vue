@@ -1008,7 +1008,25 @@ const formattedPartitions = computed(() => {
     }
   }
 
-  return partitionTable.value.map((entry, index) => {
+  const reservedRows = RESERVED_SEGMENTS.map(segment => {
+    const offsetHex = `0x${segment.offset.toString(16).toUpperCase()}`;
+    const sizeText = formatBytes(segment.size) ?? `${segment.size} bytes`;
+    return {
+      label: segment.label,
+      typeLabel: 'Reserved',
+      subtypeLabel: 'Reserved',
+      typeHex: 'N/A',
+      subtypeHex: 'N/A',
+      offset: segment.offset,
+      offsetHex,
+      size: segment.size,
+      sizeText,
+      color: segment.color,
+      backgroundImage: null,
+    };
+  });
+
+  const partitionRows = partitionTable.value.map((entry, index) => {
     const segment = segmentByOffset.get(entry.offset);
     const typeHex = toPaddedHex(entry.type);
     const subtypeHex = toPaddedHex(entry.subtype);
@@ -1039,6 +1057,8 @@ const formattedPartitions = computed(() => {
       backgroundImage: segment?.backgroundImage ?? null,
     };
   });
+
+  return [...reservedRows, ...partitionRows].sort((a, b) => a.offset - b.offset);
 });
 
 const connectionChipLabel = computed(() => {
