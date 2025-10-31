@@ -99,17 +99,6 @@
         </v-col>
       </v-row>
       <div class="tools-card__actions">
-        <v-progress-linear
-          v-if="downloadProgress.visible"
-          :model-value="downloadProgress.value"
-          color="primary"
-          height="8"
-          rounded
-          striped
-          class="download-progress"
-        >
-          <strong>{{ downloadProgress.label }}</strong>
-        </v-progress-linear>
         <v-btn
           color="primary"
           variant="tonal"
@@ -172,6 +161,17 @@
         </v-col>
       </v-row>
       <div class="tools-card__actions">
+        <v-progress-linear
+          v-if="downloadProgress.visible"
+          :model-value="downloadProgress.value"
+          color="primary"
+          height="16"
+          rounded
+          striped
+          class="download-progress"
+        >
+          <strong>{{ downloadProgress.label }}</strong>
+        </v-progress-linear>
         <v-btn
           color="primary"
           variant="tonal"
@@ -189,8 +189,8 @@
         >
           <v-icon start>mdi-delete-sweep</v-icon>
           Erase Entire Flash
-    </v-btn>
-  </div>
+        </v-btn>
+      </div>
       <v-divider v-if="partitionOptions.length" class="my-4" />
       <div v-if="partitionOptions.length" class="partition-tools">
         <v-select
@@ -234,17 +234,6 @@
           </v-btn>
         </div>
       </div>
-  <v-progress-linear
-    v-if="downloadProgress.visible"
-    :model-value="downloadProgress.value"
-    color="primary"
-    height="8"
-    rounded
-    striped
-    class="download-progress"
-  >
-    <strong>{{ downloadProgress.label }}</strong>
-  </v-progress-linear>
   <v-alert
     v-if="flashReadStatus"
     :type="flashReadStatusType"
@@ -493,6 +482,11 @@ function handlePresetChange(value) {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.download-progress {
+  flex: 1 1 100%;
+  min-width: 260px;
 }
 
 .partition-tools {
