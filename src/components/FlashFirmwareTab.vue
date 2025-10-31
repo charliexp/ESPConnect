@@ -197,7 +197,7 @@
           <v-btn
             color="primary"
             variant="tonal"
-            :disabled="busy || maintenanceBusy || !selectedPartition"
+            :disabled="busy || maintenanceBusy || selectedPartition === null"
             @click="emit('download-partition')"
           >
             <v-icon start>mdi-download-multiple</v-icon>
