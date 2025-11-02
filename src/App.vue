@@ -815,6 +815,7 @@ const spiffsAgentRuntime = {
   buffer: '',
   decoder: null,
   encoder: new TextEncoder(),
+  commandActive: false,
 };
 const SPIFFS_AGENT_LINE_TIMEOUT = 6000;
 const SPIFFS_AGENT_BASE64_CHUNK = 57;
@@ -2986,7 +2987,9 @@ async function handleDeploySpiffsAgent() {
       '[warn]'
     );
     queueMicrotask(() => {
-      handleListSpiffsFiles();
+      handleListSpiffsFiles({ silent: true }).catch(error => {
+        appendLog(`SPIFFS agent auto-refresh failed: ${error?.message || error}`, '[debug]');
+      });
     });
   } catch (error) {
     spiffsAgent.running = false;
@@ -3048,33 +3051,54 @@ async function handleDeploySpiffsAgent() {
   }
 }
 
-async function handleListSpiffsFiles() {
+async function handleListSpiffsFiles(options = {}) {
+  const { silent = false } = options;
   if (!spiffsAgent.running) {
-    spiffsAgent.status = 'Upload the stub to the device before listing files.';
+    if (!silent) {
+      spiffsAgent.status = 'Upload the stub to the device before listing files.';
+    }
     return;
   }
-  if (spiffsAgent.busy) {
+  if (spiffsAgentRuntime.commandActive) {
+    if (!silent) {
+      spiffsAgent.status = 'Agent is busy processing a command...';
+    }
     return;
   }
-  spiffsAgent.busy = true;
-  spiffsAgent.error = null;
+  if (spiffsAgent.busy && !silent) {
+    return;
+  }
+  if (!silent) {
+    spiffsAgent.busy = true;
+    spiffsAgent.error = null;
+  }
   try {
-    spiffsAgent.status = 'Listing SPIFFS files...';
+    spiffsAgentRuntime.commandActive = true;
+    if (!silent) {
+      spiffsAgent.status = 'Listing SPIFFS files...';
+    }
     const files = await fetchSpiffsFileList();
     spiffsAgent.files = files;
-    if (files.length) {
-      spiffsAgent.status = `Found ${files.length} file${files.length === 1 ? '' : 's'} on SPIFFS.`;
-    } else {
-      spiffsAgent.status = 'SPIFFS is empty.';
+    if (!silent) {
+      if (files.length) {
+        spiffsAgent.status = `Found ${files.length} file${files.length === 1 ? '' : 's'} on SPIFFS.`;
+      } else {
+        spiffsAgent.status = 'SPIFFS is empty.';
+      }
     }
     appendLog('SPIFFS agent: file list refreshed.', '[debug]');
   } catch (error) {
     const message = error?.message || String(error);
     spiffsAgent.error = message;
-    spiffsAgent.status = `List failed: ${message}`;
+    if (!silent) {
+      spiffsAgent.status = `List failed: ${message}`;
+    }
     appendLog(`SPIFFS agent list failed: ${message}`, '[warn]');
   } finally {
-    spiffsAgent.busy = false;
+    spiffsAgentRuntime.commandActive = false;
+    if (!silent) {
+      spiffsAgent.busy = false;
+    }
   }
 }
 
@@ -3087,6 +3111,10 @@ async function handleDeleteSpiffsFile(name) {
     spiffsAgent.status = 'SPIFFS agent is not running.';
     return;
   }
+  if (spiffsAgentRuntime.commandActive) {
+    spiffsAgent.status = 'Agent is busy processing a command...';
+    return;
+  }
   if (spiffsAgent.busy) {
     return;
   }
@@ -3097,6 +3125,7 @@ async function handleDeleteSpiffsFile(name) {
   spiffsAgent.busy = true;
   spiffsAgent.error = null;
   try {
+    spiffsAgentRuntime.commandActive = true;
     spiffsAgent.status = `Deleting ${target}...`;
     await writeSpiffsAgentLines([`DELETE ${target}`]);
     const response = await readSpiffsAgentLine({ skipEmpty: true });
@@ -3116,6 +3145,7 @@ async function handleDeleteSpiffsFile(name) {
     spiffsAgent.status = `Delete failed: ${message}`;
     appendLog(`SPIFFS agent delete failed: ${message}`, '[warn]');
   } finally {
+    spiffsAgentRuntime.commandActive = false;
     spiffsAgent.busy = false;
   }
 }
@@ -3126,6 +3156,10 @@ async function handleUploadSpiffsFile(payload) {
   }
   if (!spiffsAgent.running) {
     spiffsAgent.status = 'SPIFFS agent is not running.';
+    return;
+  }
+  if (spiffsAgentRuntime.commandActive) {
+    spiffsAgent.status = 'Agent is busy processing a command...';
     return;
   }
   if (spiffsAgent.busy) {
@@ -3151,6 +3185,7 @@ async function handleUploadSpiffsFile(payload) {
   spiffsAgent.busy = true;
   spiffsAgent.error = null;
   try {
+    spiffsAgentRuntime.commandActive = true;
     spiffsAgent.status = `Uploading ${name} (${data.length.toLocaleString()} bytes)...`;
     const port = currentPort.value;
     if (!port?.writable) {
@@ -3195,6 +3230,7 @@ async function handleUploadSpiffsFile(payload) {
     spiffsAgent.status = `Upload failed: ${message}`;
     appendLog(`SPIFFS agent upload failed: ${message}`, '[warn]');
   } finally {
+    spiffsAgentRuntime.commandActive = false;
     spiffsAgent.busy = false;
   }
 }
@@ -3208,6 +3244,10 @@ async function handleDownloadSpiffsFile(name) {
     spiffsAgent.status = 'SPIFFS agent is not running.';
     return;
   }
+  if (spiffsAgentRuntime.commandActive) {
+    spiffsAgent.status = 'Agent is busy processing a command...';
+    return;
+  }
   if (spiffsAgent.busy) {
     return;
   }
@@ -3218,6 +3258,7 @@ async function handleDownloadSpiffsFile(name) {
   spiffsAgent.busy = true;
   spiffsAgent.error = null;
   try {
+    spiffsAgentRuntime.commandActive = true;
     spiffsAgent.status = `Reading ${target}...`;
     await writeSpiffsAgentLines([`READ ${target}`]);
     const header = await readSpiffsAgentLine({ skipEmpty: true });
@@ -3249,6 +3290,7 @@ async function handleDownloadSpiffsFile(name) {
     spiffsAgent.status = `Download failed: ${message}`;
     appendLog(`SPIFFS agent download failed: ${message}`, '[warn]');
   } finally {
+    spiffsAgentRuntime.commandActive = false;
     spiffsAgent.busy = false;
   }
 }
@@ -3258,12 +3300,17 @@ async function handleFormatSpiffsAgent() {
     spiffsAgent.status = 'SPIFFS agent is not running.';
     return;
   }
+  if (spiffsAgentRuntime.commandActive) {
+    spiffsAgent.status = 'Agent is busy processing a command...';
+    return;
+  }
   if (spiffsAgent.busy) {
     return;
   }
   spiffsAgent.busy = true;
   spiffsAgent.error = null;
   try {
+    spiffsAgentRuntime.commandActive = true;
     spiffsAgent.status = 'Formatting SPIFFS...';
     await writeSpiffsAgentLines(['FORMAT']);
     const response = await readSpiffsAgentLine({ skipEmpty: true });
@@ -3282,6 +3329,7 @@ async function handleFormatSpiffsAgent() {
     spiffsAgent.status = `Format failed: ${message}`;
     appendLog(`SPIFFS agent format failed: ${message}`, '[warn]');
   } finally {
+    spiffsAgentRuntime.commandActive = false;
     spiffsAgent.busy = false;
   }
 }
@@ -3291,12 +3339,17 @@ async function handleResetSpiffsAgent() {
     spiffsAgent.status = 'SPIFFS agent is not running.';
     return;
   }
+  if (spiffsAgentRuntime.commandActive) {
+    spiffsAgent.status = 'Agent is busy processing a command...';
+    return;
+  }
   if (spiffsAgent.busy) {
     return;
   }
   spiffsAgent.busy = true;
   spiffsAgent.error = null;
   try {
+    spiffsAgentRuntime.commandActive = true;
     spiffsAgent.status = 'Resetting device...';
     await writeSpiffsAgentLines(['RESET']);
     let response = null;
@@ -3317,6 +3370,7 @@ async function handleResetSpiffsAgent() {
     appendLog(`SPIFFS agent reset failed: ${message}`, '[warn]');
     return;
   } finally {
+    spiffsAgentRuntime.commandActive = false;
     spiffsAgent.busy = false;
     spiffsAgent.running = false;
     spiffsAgent.files = [];
