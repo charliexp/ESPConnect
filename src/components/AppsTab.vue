@@ -187,6 +187,14 @@ defineProps({
   font-size: 0.95rem;
 }
 
+:deep(.v-theme--dark) .apps-tab__label {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+:deep(.v-theme--dark) .apps-tab__value {
+  color: rgba(255, 255, 255, 0.92);
+}
+
 .apps-tab__subtitle {
   padding-bottom: 0;
 }
