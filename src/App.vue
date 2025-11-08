@@ -108,7 +108,7 @@
                 :upload-blocked-reason="littlefsState.uploadBlockedReason" fs-label="LittleFS"
                 partition-title="LittleFS Partition"
                 empty-state-message="No LittleFS files found. Read the partition or upload to begin."
-                :enable-preview="false" :enable-download="false"
+                :is-file-viewable="isViewableSpiffsFile" :get-file-preview-info="resolveSpiffsViewInfo"
                 @select-partition="handleSelectLittlefsPartition" @refresh="handleRefreshLittlefs"
                 @backup="handleLittlefsBackup" @restore="handleLittlefsRestore"
                 @download-file="handleLittlefsDownloadFile" @view-file="handleLittlefsView"
@@ -406,7 +406,7 @@
                 Close
               </v-btn>
               <v-btn color="primary" variant="tonal" :disabled="!spiffsViewerDialog.name"
-                @click="handleSpiffsDownloadFile(spiffsViewerDialog.name)">
+                @click="handleFilesystemViewerDownload">
                 <v-icon start>mdi-download</v-icon>
                 Download
               </v-btn>
@@ -1262,19 +1262,77 @@ async function handleLittlefsSave() {
   }
 }
 
-function handleLittlefsDownloadFile(name) {
-  if (name) {
-    littlefsState.status = `Downloading "${name}" is not available yet. Use Backup to export the entire image.`;
-  } else {
-    littlefsState.status = 'Per-file download is not available for LittleFS yet. Use Backup to export the image.';
+async function readLittlefsFile(name) {
+  if (!littlefsState.client) {
+    throw new Error('LittleFS client unavailable.');
+  }
+  if (!name) {
+    throw new Error('File name is required.');
+  }
+  const reader =
+    typeof littlefsState.client.readFile === 'function'
+      ? littlefsState.client.readFile
+      : typeof littlefsState.client.read === 'function'
+        ? littlefsState.client.read
+        : null;
+  if (!reader) {
+    throw new Error('LittleFS module does not support per-file reads. Update the WASM bundle.');
+  }
+  const result = reader.call(littlefsState.client, name);
+  const data = result instanceof Promise ? await result : result;
+  if (!(data instanceof Uint8Array)) {
+    throw new Error('LittleFS read returned unexpected data.');
+  }
+  return data;
+}
+
+async function handleLittlefsDownloadFile(name) {
+  if (!littlefsState.client || !name) return;
+  try {
+    const data = await readLittlefsFile(name);
+    saveBinaryFile(name, data);
+    appendLog(`LittleFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[debug]');
+  } catch (error) {
+    littlefsState.error = formatErrorMessage(error);
+    littlefsState.status = 'LittleFS download failed.';
   }
 }
 
-function handleLittlefsView(name) {
-  if (name) {
-    littlefsState.status = `Preview for "${name}" is not available for LittleFS yet.`;
-  } else {
-    littlefsState.status = 'Preview is not available for LittleFS yet.';
+async function handleLittlefsView(name) {
+  if (!littlefsState.client) return;
+  const viewInfo = resolveSpiffsViewInfo(name);
+  if (!viewInfo) {
+    littlefsState.status = 'This file type cannot be previewed. Download it instead.';
+    return;
+  }
+  resetViewerMedia();
+  spiffsViewerDialog.visible = true;
+  spiffsViewerDialog.name = name;
+  spiffsViewerDialog.loading = true;
+  spiffsViewerDialog.error = null;
+  spiffsViewerDialog.content = '';
+  spiffsViewerDialog.mode = viewInfo.mode;
+  spiffsViewerDialog.source = 'littlefs';
+  try {
+    const data = await readLittlefsFile(name);
+    if (data.length > SPIFFS_VIEWER_MAX_BYTES) {
+      throw new Error(
+        `File too large to preview (limit ${formatBytes(SPIFFS_VIEWER_MAX_BYTES) ?? SPIFFS_VIEWER_MAX_BYTES} bytes).`,
+      );
+    }
+    if (viewInfo.mode === 'image') {
+      const blob = new Blob([data], { type: viewInfo.mime || 'image/*' });
+      spiffsViewerDialog.imageUrl = URL.createObjectURL(blob);
+    } else if (viewInfo.mode === 'audio') {
+      const blob = new Blob([data], { type: viewInfo.mime || 'audio/*' });
+      spiffsViewerDialog.audioUrl = URL.createObjectURL(blob);
+    } else {
+      spiffsViewerDialog.content = SPIFFS_VIEWER_DECODER.decode(data);
+    }
+  } catch (error) {
+    spiffsViewerDialog.error = formatErrorMessage(error);
+  } finally {
+    spiffsViewerDialog.loading = false;
   }
 }
 
@@ -1772,6 +1830,17 @@ function isViewableSpiffsFile(name = '') {
   return Boolean(resolveSpiffsViewInfo(name));
 }
 
+function resetViewerMedia() {
+  if (spiffsViewerDialog.imageUrl) {
+    URL.revokeObjectURL(spiffsViewerDialog.imageUrl);
+  }
+  if (spiffsViewerDialog.audioUrl) {
+    URL.revokeObjectURL(spiffsViewerDialog.audioUrl);
+  }
+  spiffsViewerDialog.imageUrl = '';
+  spiffsViewerDialog.audioUrl = '';
+}
+
 async function handleSpiffsView(name) {
   if (!spiffsState.client) return;
   const viewInfo = resolveSpiffsViewInfo(name);
@@ -1779,20 +1848,14 @@ async function handleSpiffsView(name) {
     spiffsState.status = 'This file type cannot be previewed. Download it instead.';
     return;
   }
-  if (spiffsViewerDialog.imageUrl) {
-    URL.revokeObjectURL(spiffsViewerDialog.imageUrl);
-  }
-  if (spiffsViewerDialog.audioUrl) {
-    URL.revokeObjectURL(spiffsViewerDialog.audioUrl);
-  }
+  resetViewerMedia();
   spiffsViewerDialog.visible = true;
   spiffsViewerDialog.name = name;
   spiffsViewerDialog.loading = true;
   spiffsViewerDialog.error = null;
   spiffsViewerDialog.content = '';
-  spiffsViewerDialog.imageUrl = '';
-  spiffsViewerDialog.audioUrl = '';
   spiffsViewerDialog.mode = viewInfo.mode;
+  spiffsViewerDialog.source = 'spiffs';
   try {
     const data = await spiffsState.client.read(name);
     if (data.length > SPIFFS_VIEWER_MAX_BYTES) {
@@ -1817,20 +1880,25 @@ async function handleSpiffsView(name) {
 }
 
 function closeSpiffsViewer() {
-  if (spiffsViewerDialog.imageUrl) {
-    URL.revokeObjectURL(spiffsViewerDialog.imageUrl);
-  }
-  if (spiffsViewerDialog.audioUrl) {
-    URL.revokeObjectURL(spiffsViewerDialog.audioUrl);
-  }
+  resetViewerMedia();
   spiffsViewerDialog.visible = false;
   spiffsViewerDialog.name = '';
   spiffsViewerDialog.content = '';
   spiffsViewerDialog.error = null;
   spiffsViewerDialog.loading = false;
   spiffsViewerDialog.mode = null;
-  spiffsViewerDialog.imageUrl = '';
-  spiffsViewerDialog.audioUrl = '';
+  spiffsViewerDialog.source = 'spiffs';
+}
+
+function handleFilesystemViewerDownload() {
+  if (!spiffsViewerDialog.name) {
+    return;
+  }
+  if (spiffsViewerDialog.source === 'littlefs') {
+    void handleLittlefsDownloadFile(spiffsViewerDialog.name);
+  } else {
+    void handleSpiffsDownloadFile(spiffsViewerDialog.name);
+  }
 }
 
 function cancelSpiffsBackup() {
@@ -2245,6 +2313,7 @@ const spiffsViewerDialog = reactive({
   mode: null,
   imageUrl: '',
   audioUrl: '',
+  source: 'spiffs',
 });
 const spiffsUploadErrorDialog = reactive({
   visible: false,
