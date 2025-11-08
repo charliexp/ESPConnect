@@ -218,38 +218,40 @@
             {{ formatSize(unwrapItem(item).size) }}
           </template>
           <template #item.actions="{ item }">
-            <v-btn
-              size="small"
-              variant="text"
-              color="info"
-              v-if="enablePreview && isViewable(unwrapItem(item).name)"
-              :disabled="loading || busy || saving || readOnly"
-              @click="emit('view-file', unwrapItem(item).name)"
-            >
-              <v-icon start size="16">{{ previewIcon(unwrapItem(item).name) }}</v-icon>
-              {{ previewLabel(unwrapItem(item).name) }}
-            </v-btn>
-            <v-btn
-              size="small"
-              variant="text"
-              color="primary"
-              v-if="enableDownload"
-              :disabled="loading || busy || saving || readOnly"
-              @click="emit('download-file', unwrapItem(item).name)"
-            >
-              <v-icon start size="16">mdi-download</v-icon>
-              Download
-            </v-btn>
-            <v-btn
-              size="small"
-              variant="text"
-              color="error"
-              :disabled="readOnly || loading || busy || saving"
-              @click="emit('delete-file', unwrapItem(item).name)"
-            >
-              <v-icon start size="16">mdi-delete</v-icon>
-              Delete
-            </v-btn>
+            <div class="filesystem-table__actions">
+              <v-btn
+                size="small"
+                variant="text"
+                color="info"
+                v-if="enablePreview && isViewable(unwrapItem(item).name)"
+                :disabled="loading || busy || saving || readOnly"
+                :icon="previewIcon(unwrapItem(item).name)"
+                :title="previewLabel(unwrapItem(item).name)"
+                :aria-label="previewLabel(unwrapItem(item).name)"
+                @click="emit('view-file', unwrapItem(item).name)"
+              />
+              <v-btn
+                size="small"
+                variant="text"
+                color="primary"
+                v-if="enableDownload"
+                :disabled="loading || busy || saving || readOnly"
+                icon="mdi-download"
+                :title="`Download ${unwrapItem(item).name}`"
+                :aria-label="`Download ${unwrapItem(item).name}`"
+                @click="emit('download-file', unwrapItem(item).name)"
+              />
+              <v-btn
+                size="small"
+                variant="text"
+                color="error"
+                :disabled="readOnly || loading || busy || saving"
+                icon="mdi-delete"
+                :title="`Delete ${unwrapItem(item).name}`"
+                :aria-label="`Delete ${unwrapItem(item).name}`"
+                @click="emit('delete-file', unwrapItem(item).name)"
+              />
+            </div>
           </template>
         </v-data-table>
         </template>
@@ -747,6 +749,11 @@ function previewLabel(name) {
   flex: 0 0 auto;
   min-width: 180px;
   max-width: 220px;
+}
+
+.filesystem-table__actions {
+  display: flex;
+  gap: 4px;
 }
 
 .filesystem-dropzone {
