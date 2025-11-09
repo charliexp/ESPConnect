@@ -1,74 +1,41 @@
 <template>
-  <v-alert
-    type="warning"
-    variant="tonal"
-    border="start"
-    class="mb-4 advanced-warning"
-    density="comfortable"
-  >
-    Firmware tools are intended for advanced users. Writing or erasing flash can permanently remove data or render the device unbootable. Double-check settings before proceeding.
+  <v-alert type="warning" variant="tonal" border="start" class="mb-4 advanced-warning" density="comfortable">
+    Firmware tools are intended for advanced users. Writing or erasing flash can permanently remove data or render the
+    device unbootable. Double-check settings before proceeding.
   </v-alert>
-  <v-card class="tools-card mb-6" variant="tonal">
-    <v-card-title class="tools-card__title">
-      <v-icon size="18" class="me-2">mdi-archive-arrow-down</v-icon>
-      Flash Backup &amp; Erase
-    </v-card-title>
+  <v-card class="tools-card mb-6" variant="tonal" prepend-icon="mdi-archive-arrow-down">
+    <template v-slot:title>
+      <span class="font-weight-black"> Flash Backup &amp; Erase
+      </span>
+    </template>
     <v-card-text class="tools-card__body">
       <v-row dense>
         <v-col cols="12" md="6">
-          <v-text-field
-            :model-value="flashReadOffset"
-            label="Start offset"
-            placeholder="0x0"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:flashReadOffset', value)"
-          />
+          <v-text-field :model-value="flashReadOffset" label="Start offset" placeholder="0x0" density="comfortable"
+            :disabled="busy || maintenanceBusy" @update:model-value="value => emit('update:flashReadOffset', value)" />
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            :model-value="flashReadLength"
-            label="Length (bytes)"
-            placeholder="0x100000"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:flashReadLength', value)"
-          />
+          <v-text-field :model-value="flashReadLength" label="Length (bytes)" placeholder="0x100000"
+            density="comfortable" :disabled="busy || maintenanceBusy"
+            @update:model-value="value => emit('update:flashReadLength', value)" />
         </v-col>
       </v-row>
       <div class="tools-card__actions">
-        <v-btn
-          color="primary"
-          variant="tonal"
-          :disabled="busy || maintenanceBusy"
-          @click="emit('download-flash')"
-        >
+        <v-btn color="primary" variant="tonal" :disabled="busy || maintenanceBusy" @click="emit('download-flash')">
           <v-icon start>mdi-download-box</v-icon>
           Download Flash Region
         </v-btn>
-        <v-btn
-          color="error"
-          variant="outlined"
-          :disabled="busy || maintenanceBusy"
-          @click="emit('erase-flash', { mode: 'full' })"
-        >
+        <v-btn color="error" variant="outlined" :disabled="busy || maintenanceBusy"
+          @click="emit('erase-flash', { mode: 'full' })">
           <v-icon start>mdi-delete-sweep</v-icon>
           Erase Entire Flash
         </v-btn>
       </div>
       <v-divider v-if="partitionOptions.length" class="my-4" />
       <div v-if="partitionOptions.length" class="partition-tools">
-        <v-select
-          :model-value="selectedPartition"
-          :items="partitionOptions"
-          item-title="label"
-          item-value="value"
-          label="Partition"
-          density="comfortable"
-          clearable
-          :disabled="busy || maintenanceBusy"
-          @update:model-value="value => emit('update:selectedPartition', value)"
-        >
+        <v-select :model-value="selectedPartition" :items="partitionOptions" item-title="label" item-value="value"
+          label="Partition" density="comfortable" clearable :disabled="busy || maintenanceBusy"
+          @update:model-value="value => emit('update:selectedPartition', value)">
           <template #item="{ props, item }">
             <v-list-item v-bind="props" class="partition-select__item">
               <template #prepend>
@@ -85,90 +52,53 @@
           </template>
         </v-select>
         <div class="tools-card__actions partition-tools__actions">
-          <v-btn
-            color="primary"
-            variant="tonal"
-            :disabled="busy || maintenanceBusy || selectedPartition === null"
-            @click="emit('download-partition')"
-          >
+          <v-btn color="primary" variant="tonal" :disabled="busy || maintenanceBusy || selectedPartition === null"
+            @click="emit('download-partition')">
             <v-icon start>mdi-download-multiple</v-icon>
             Download Selected Partition
           </v-btn>
-          <v-btn
-            color="primary"
-            variant="text"
-            :disabled="busy || maintenanceBusy"
-            @click="emit('download-all-partitions')"
-          >
+          <v-btn color="primary" variant="text" :disabled="busy || maintenanceBusy"
+            @click="emit('download-all-partitions')">
             <v-icon start>mdi-select-group</v-icon>
             Download All Partitions
           </v-btn>
-          <v-btn
-            color="secondary"
-            variant="text"
-            :disabled="busy || maintenanceBusy"
-            @click="emit('download-used-flash')"
-          >
+          <v-btn color="secondary" variant="text" :disabled="busy || maintenanceBusy"
+            @click="emit('download-used-flash')">
             <v-icon start>mdi-content-save</v-icon>
             Download Used Flash
           </v-btn>
         </div>
       </div>
-  <v-alert
-    v-if="flashReadStatus"
-    :type="flashReadStatusType"
-    variant="tonal"
-    density="comfortable"
-    border="start"
-    class="mt-3"
-  >
-    {{ flashReadStatus }}
-  </v-alert>
+      <v-alert v-if="flashReadStatus" :type="flashReadStatusType" variant="tonal" density="comfortable" border="start"
+        class="mt-3">
+        {{ flashReadStatus }}
+      </v-alert>
     </v-card-text>
   </v-card>
-  <v-card class="tools-card" variant="tonal">
-    <v-card-title class="tools-card__title">
-      <v-icon size="18" class="me-2">mdi-lightning-bolt</v-icon>
-      Flash Firmware
-    </v-card-title>
+  <v-card class="tools-card" variant="tonal" prepend-icon="mdi-lightning-bolt">
+    <template v-slot:title>
+      <span class="font-weight-black"> Flash Firmware</span>
+    </template>
     <v-card-text class="tools-card__body">
       <v-row class="mb-2" dense>
         <v-col cols="12" md="8">
-          <v-file-input
-            label="Firmware binary (.bin)"
-            prepend-icon="mdi-file-upload"
-            accept=".bin"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('firmware-input', value)"
-          />
+          <v-file-input label="Firmware binary (.bin)" prepend-icon="mdi-file-upload" accept=".bin"
+            density="comfortable" :disabled="busy || maintenanceBusy"
+            @update:model-value="value => emit('firmware-input', value)" />
         </v-col>
         <v-col cols="12" md="4">
-          <v-text-field
-            :model-value="flashOffset"
-            label="Flash offset"
-            placeholder="0x0"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:flashOffset', value)"
-          />
+          <v-text-field :model-value="flashOffset" label="Flash offset" placeholder="0x0" density="comfortable"
+            :disabled="busy || maintenanceBusy" @update:model-value="value => emit('update:flashOffset', value)" />
         </v-col>
         <v-col cols="12" md="4">
-          <v-select
-            :model-value="selectedPreset"
-            :items="offsetPresets"
-            label="Recommended offsets"
-            item-title="label"
-            item-value="value"
-            clearable
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => handlePresetChange(value)"
-          >
+          <v-select :model-value="selectedPreset" :items="offsetPresets" label="Recommended offsets" item-title="label"
+            item-value="value" clearable density="comfortable" :disabled="busy || maintenanceBusy"
+            @update:model-value="value => handlePresetChange(value)">
             <template #item="{ props, item }">
               <v-list-item v-bind="props" class="partition-select__item">
                 <template #prepend>
-                  <span class="partition-select__swatch" :style="{ backgroundColor: resolvePartitionColor(item?.raw) }" />
+                  <span class="partition-select__swatch"
+                    :style="{ backgroundColor: resolvePartitionColor(item?.raw) }" />
                 </template>
                 <v-list-item-title>{{ item.raw.label }}</v-list-item-title>
               </v-list-item>
@@ -183,28 +113,16 @@
         </v-col>
       </v-row>
 
-  <v-checkbox
-    :model-value="eraseFlash"
-    label="Erase entire flash before writing"
-    density="comfortable"
-    hide-details
-    :disabled="busy || maintenanceBusy"
-    @update:model-value="value => emit('update:eraseFlash', value)"
-  />
+      <v-checkbox :model-value="eraseFlash" label="Erase entire flash before writing" density="comfortable" hide-details
+        :disabled="busy || maintenanceBusy" @update:model-value="value => emit('update:eraseFlash', value)" />
 
       <p class="flash-tools__hint text-medium-emphasis">
         Flashing runs at 921,600&nbsp;bps by default. Drop the baud if the device struggles to sync.
         The serial monitor automatically switches to 115,200&nbsp;bps for stability.
       </p>
 
-      <v-btn
-        color="primary"
-        size="large"
-        block
-        class="mt-2"
-        :disabled="!canFlash || busy || maintenanceBusy"
-        @click="emit('flash')"
-      >
+      <v-btn color="primary" size="large" block class="mt-2" :disabled="!canFlash || busy || maintenanceBusy"
+        @click="emit('flash')">
         <v-icon start>mdi-lightning-bolt</v-icon>
         Flash Firmware
       </v-btn>
@@ -213,27 +131,15 @@
 
 
 
-  <v-card class="tools-card mt-6" variant="tonal">
-    <v-card-title class="tools-card__title">
-      <v-icon size="18" class="me-2">mdi-chip</v-icon>
-      Register Access
-    </v-card-title>
+  <v-card class="tools-card mt-6" variant="tonal" prepend-icon="mdi-chip">
+    <template v-slot:title>
+      <span class="font-weight-black"> Register Access</span>
+    </template>
     <v-card-text class="tools-card__body">
-      <v-autocomplete
-        v-if="registerOptions.length"
-        class="register-quick-select"
-        :items="registerOptions"
-        item-title="label"
-        item-value="address"
-        density="comfortable"
-        variant="outlined"
-        hide-details
-        label="Quick-select register"
-        :model-value="selectedRegisterAddress"
-        :return-object="false"
-        clearable
-        @update:model-value="handleRegisterSelect"
-      >
+      <v-autocomplete v-if="registerOptions.length" class="register-quick-select" :items="registerOptions"
+        item-title="label" item-value="address" density="comfortable" variant="outlined" hide-details
+        label="Quick-select register" :model-value="selectedRegisterAddress" :return-object="false" clearable
+        @update:model-value="handleRegisterSelect">
         <template #item="{ props, item }">
           <v-list-item v-bind="props">
             <v-list-item-title>{{ item.raw.label }}</v-list-item-title>
@@ -244,31 +150,17 @@
           <span>{{ item.raw.label }}</span>
         </template>
       </v-autocomplete>
-      <v-alert
-        v-if="selectedRegisterInfo"
-        type="info"
-        variant="tonal"
-        border="start"
-        density="comfortable"
-        class="register-info"
-      >
+      <v-alert v-if="selectedRegisterInfo" type="info" variant="tonal" border="start" density="comfortable"
+        class="register-info">
         <div class="register-info__title">{{ selectedRegisterInfo.label }}</div>
         <div class="register-info__address">{{ selectedRegisterInfo.address }}</div>
         <div class="register-info__description">{{ selectedRegisterInfo.description }}</div>
         <div class="register-info__link" v-if="selectedRegisterInfo.link">
-          <a :href="selectedRegisterInfo.link" target="_blank" rel="noopener"
-            >View register reference</a
-          >
+          <a :href="selectedRegisterInfo.link" target="_blank" rel="noopener">View register reference</a>
         </div>
       </v-alert>
-      <v-alert
-        v-else-if="registerReference"
-        type="info"
-        variant="tonal"
-        border="start"
-        density="comfortable"
-        class="register-info"
-      >
+      <v-alert v-else-if="registerReference" type="info" variant="tonal" border="start" density="comfortable"
+        class="register-info">
         <div class="register-info__title">{{ registerReference.title }}</div>
         <div class="register-info__link">
           <a :href="registerReference.url" target="_blank" rel="noopener">Open technical reference</a>
@@ -276,88 +168,44 @@
       </v-alert>
       <v-row dense>
         <v-col cols="12" md="6">
-          <v-text-field
-            :model-value="registerAddress"
-            label="Register address"
-            placeholder="0x60000000"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:registerAddress', value)"
-          />
+          <v-text-field :model-value="registerAddress" label="Register address" placeholder="0x60000000"
+            density="comfortable" :disabled="busy || maintenanceBusy"
+            @update:model-value="value => emit('update:registerAddress', value)" />
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            :model-value="registerValue"
-            label="Value"
-            placeholder="0x0"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:registerValue', value)"
-          />
+          <v-text-field :model-value="registerValue" label="Value" placeholder="0x0" density="comfortable"
+            :disabled="busy || maintenanceBusy" @update:model-value="value => emit('update:registerValue', value)" />
         </v-col>
       </v-row>
       <div class="tools-card__actions">
-        <v-btn
-          color="primary"
-          variant="tonal"
-          :disabled="busy || maintenanceBusy"
-          @click="emit('read-register')"
-        >
+        <v-btn color="primary" variant="tonal" :disabled="busy || maintenanceBusy" @click="emit('read-register')">
           <v-icon start>mdi-eye</v-icon>
           Read Register
         </v-btn>
-        <v-btn
-          color="primary"
-          variant="text"
-          :disabled="busy || maintenanceBusy"
-          @click="emit('write-register')"
-        >
+        <v-btn color="primary" variant="text" :disabled="busy || maintenanceBusy" @click="emit('write-register')">
           <v-icon start>mdi-pencil</v-icon>
           Write Register
         </v-btn>
       </div>
-      <v-alert
-        v-if="registerStatus"
-        :type="registerStatusType"
-        variant="tonal"
-        density="comfortable"
-        border="start"
-        class="mt-3"
-      >
+      <v-alert v-if="registerStatus" :type="registerStatusType" variant="tonal" density="comfortable" border="start"
+        class="mt-3">
         {{ registerStatus }}
       </v-alert>
-      <v-alert
-        v-else-if="registerReadResult"
-        type="info"
-        variant="tonal"
-        density="comfortable"
-        border="start"
-        class="mt-3"
-      >
+      <v-alert v-else-if="registerReadResult" type="info" variant="tonal" density="comfortable" border="start"
+        class="mt-3">
         Last read value: <code>{{ registerReadResult }}</code>
       </v-alert>
     </v-card-text>
   </v-card>
-  <v-card class="tools-card mt-6" variant="tonal">
-    <v-card-title class="tools-card__title">
-      <v-icon size="18" class="me-2">mdi-shield-check-outline</v-icon>
-      Flash Integrity
-    </v-card-title>
+  <v-card class="tools-card mt-6" variant="tonal" prepend-icon="mdi-shield-check-outline">
+    <template v-slot:title>
+      <span class="font-weight-black"> Flash Integrity</span>
+    </template>
     <v-card-text class="tools-card__body">
-      <v-select
-        v-if="partitionOptions.length"
-        class="integrity-select"
-        :items="partitionOptions"
-        item-title="label"
-        item-value="value"
-        variant="outlined"
-        density="comfortable"
-        clearable
-        label="Partition"
-        :model-value="integrityPartition"
-        :disabled="busy || maintenanceBusy"
-        @update:model-value="handleIntegrityPartitionSelect"
-      >
+      <v-select v-if="partitionOptions.length" class="integrity-select" :items="partitionOptions" item-title="label"
+        item-value="value" variant="outlined" density="comfortable" clearable label="Partition"
+        :model-value="integrityPartition" :disabled="busy || maintenanceBusy"
+        @update:model-value="handleIntegrityPartitionSelect">
         <template #item="{ props, item }">
           <v-list-item v-bind="props" class="partition-select__item">
             <template #prepend>
@@ -378,65 +226,29 @@
       </p>
       <v-row dense class="flash-progress-row">
         <v-col cols="12" md="6">
-          <v-text-field
-            :model-value="md5Offset"
-            label="Start offset"
-            placeholder="0x0"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:md5Offset', value)"
-          />
+          <v-text-field :model-value="md5Offset" label="Start offset" placeholder="0x0" density="comfortable"
+            :disabled="busy || maintenanceBusy" @update:model-value="value => emit('update:md5Offset', value)" />
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            :model-value="md5Length"
-            label="Length (bytes)"
-            placeholder="0x100000"
-            density="comfortable"
-            :disabled="busy || maintenanceBusy"
-            @update:model-value="value => emit('update:md5Length', value)"
-          />
+          <v-text-field :model-value="md5Length" label="Length (bytes)" placeholder="0x100000" density="comfortable"
+            :disabled="busy || maintenanceBusy" @update:model-value="value => emit('update:md5Length', value)" />
         </v-col>
       </v-row>
       <div class="tools-card__actions">
-        <v-btn
-          color="primary"
-          variant="tonal"
-          :disabled="busy || maintenanceBusy"
-          @click="emit('compute-md5')"
-        >
+        <v-btn color="primary" variant="tonal" :disabled="busy || maintenanceBusy" @click="emit('compute-md5')">
           <v-icon start>mdi-fingerprint</v-icon>
           Compute MD5
         </v-btn>
       </div>
-      <v-alert
-        v-if="md5Status"
-        :type="md5StatusType"
-        variant="tonal"
-        density="comfortable"
-        border="start"
-        class="mt-3"
-      >
+      <v-alert v-if="md5Status" :type="md5StatusType" variant="tonal" density="comfortable" border="start" class="mt-3">
         {{ md5Status }}
       </v-alert>
-      <v-alert
-        v-else-if="md5Result"
-        type="success"
-        variant="tonal"
-        density="comfortable"
-        border="start"
-        class="mt-3"
-      >
+      <v-alert v-else-if="md5Result" type="success" variant="tonal" density="comfortable" border="start" class="mt-3">
         MD5 checksum: <code>{{ md5Result }}</code>
       </v-alert>
     </v-card-text>
   </v-card>
-  <v-dialog
-    :model-value="flashProgressDialog.visible"
-    persistent
-    max-width="420"
-    class="progress-dialog"
-  >
+  <v-dialog :model-value="flashProgressDialog.visible" persistent max-width="420" class="progress-dialog">
     <v-card class="progress-dialog__card">
       <v-card-title class="progress-dialog__title">
         <v-icon start color="primary">mdi-lightning-bolt</v-icon>
@@ -446,34 +258,18 @@
         <div class="progress-dialog__label">
           {{ flashProgressDialog.label || 'Preparing flash...' }}
         </div>
-        <v-progress-linear
-          :model-value="flashProgressDialog.value"
-          height="24"
-          color="primary"
-          rounded
-          striped
-        />
+        <v-progress-linear :model-value="flashProgressDialog.value" height="24" color="primary" rounded striped />
       </v-card-text>
       <v-card-actions class="progress-dialog__actions">
         <v-spacer />
-        <v-btn
-          color="secondary"
-          variant="tonal"
-          :disabled="!flashInProgress"
-          @click="emit('cancel-flash')"
-        >
+        <v-btn color="secondary" variant="tonal" :disabled="!flashInProgress" @click="emit('cancel-flash')">
           <v-icon start>mdi-stop</v-icon>
           Stop
         </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <v-dialog
-    :model-value="downloadProgress.visible"
-    persistent
-    max-width="420"
-    class="progress-dialog"
-  >
+  <v-dialog :model-value="downloadProgress.visible" persistent max-width="420" class="progress-dialog">
     <v-card class="progress-dialog__card">
       <v-card-title class="progress-dialog__title">
         <v-icon start color="primary">mdi-download</v-icon>
@@ -483,21 +279,11 @@
         <div class="progress-dialog__label">
           {{ downloadProgress.label || 'Preparing download...' }}
         </div>
-        <v-progress-linear
-          :model-value="downloadProgress.value"
-          height="24"
-          color="primary"
-          rounded
-          striped
-        />
+        <v-progress-linear :model-value="downloadProgress.value" height="24" color="primary" rounded striped />
       </v-card-text>
       <v-card-actions class="progress-dialog__actions">
         <v-spacer />
-        <v-btn
-          color="secondary"
-          variant="tonal"
-          @click="emit('cancel-download')"
-        >
+        <v-btn color="secondary" variant="tonal" @click="emit('cancel-download')">
           <v-icon start>mdi-stop</v-icon>
           Stop
         </v-btn>
@@ -861,5 +647,4 @@ function handleRegisterSelect(value) {
   color: color-mix(in srgb, var(--v-theme-on-surface) 70%, transparent);
   margin-top: -4px;
 }
-
 </style>
