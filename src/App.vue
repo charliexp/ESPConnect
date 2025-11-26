@@ -1047,7 +1047,7 @@ async function loadLittlefsPartition(partition) {
           updateLittlefsUsage(partition);
           littlefsState.status =
             'LittleFS partition appears blank. Download a backup, click Format, then Save to Flash to initialize it.';
-          appendLog('LittleFS partition appears blank/unformatted. Format then save to persist.', '[warn]');
+          appendLog('LittleFS partition appears blank/unformatted. Format then save to persist.', '[ESPConnect-Warn]');
           littlefsState.loadCancelled = false;
           return;
         } catch (fallbackError) {
@@ -1075,7 +1075,7 @@ async function loadLittlefsPartition(partition) {
     littlefsState.status = count === 1 ? 'Loaded 1 file.' : `Loaded ${count} files.`;
     appendLog(
       `LittleFS partition ${partition.label} loaded (${count} file${count === 1 ? '' : 's'}).`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
   } catch (error) {
     const message = formatErrorMessage(error);
@@ -1173,7 +1173,7 @@ async function handleLittlefsBackup() {
     littlefsState.backupDone = true;
     littlefsState.sessionBackupDone = true;
     littlefsState.status = 'Backup downloaded. You can now save changes.';
-    appendLog('LittleFS backup downloaded.', '[debug]');
+    appendLog('LittleFS backup downloaded.', '[ESPConnect-Debug]');
   } catch (error) {
     const message = formatErrorMessage(error);
     if (message === 'Download cancelled by user') {
@@ -1240,7 +1240,7 @@ async function handleLittlefsRestore(file) {
     });
     littlefsState.status = 'LittleFS image restored.';
     littlefsState.backupDone = true;
-    appendLog('LittleFS partition restored from backup.', '[debug]');
+    appendLog('LittleFS partition restored from backup.', '[ESPConnect-Debug]');
     await loadLittlefsPartition(partition);
   } catch (error) {
     littlefsState.error = formatErrorMessage(error);
@@ -1310,7 +1310,7 @@ async function handleLittlefsUpload({ file }) {
     littlefsState.client.addFile(targetName, data);
     await refreshLittlefsListing();
     markLittlefsDirty(`Staged ${targetName}. Remember to Save.`);
-    appendLog(`LittleFS staged ${targetName} (${data.length.toLocaleString()} bytes).`, '[debug]');
+    appendLog(`LittleFS staged ${targetName} (${data.length.toLocaleString()} bytes).`, '[ESPConnect-Debug]');
   } catch (error) {
     littlefsState.error = formatErrorMessage(error);
     showToast(littlefsState.error, { color: 'error' });
@@ -1337,7 +1337,7 @@ async function handleLittlefsDelete(name) {
     littlefsState.client.deleteFile(name);
     await refreshLittlefsListing();
     markLittlefsDirty(`${name} deleted. Save to persist.`);
-    appendLog(`LittleFS staged deletion of ${name}.`, '[debug]');
+    appendLog(`LittleFS staged deletion of ${name}.`, '[ESPConnect-Debug]');
   } catch (error) {
     littlefsState.error = formatErrorMessage(error);
   } finally {
@@ -1361,7 +1361,7 @@ async function handleLittlefsFormat() {
     littlefsState.client.format();
     await refreshLittlefsListing();
     markLittlefsDirty('LittleFS formatted. Save to apply.');
-    appendLog('LittleFS staged format operation.', '[debug]');
+    appendLog('LittleFS staged format operation.', '[ESPConnect-Debug]');
   } catch (error) {
     littlefsState.error = formatErrorMessage(error);
   } finally {
@@ -1425,7 +1425,7 @@ async function handleLittlefsSave() {
     });
     littlefsState.dirty = false;
     littlefsState.status = 'LittleFS saved to flash.';
-    appendLog('LittleFS partition updated on flash.', '[debug]');
+    appendLog('LittleFS partition updated on flash.', '[ESPConnect-Debug]');
     await loadLittlefsPartition(partition);
   } catch (error) {
     littlefsState.error = formatErrorMessage(error);
@@ -1468,7 +1468,7 @@ async function handleLittlefsDownloadFile(name) {
   try {
     const data = await readLittlefsFile(name);
     saveBinaryFile(name, data);
-    appendLog(`LittleFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[debug]');
+    appendLog(`LittleFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[ESPConnect-Debug]');
   } catch (error) {
     littlefsState.error = formatErrorMessage(error);
     littlefsState.status = 'LittleFS download failed.';
@@ -1594,7 +1594,7 @@ async function loadFatfsPartition(partition) {
         });
         fatfsState.status =
           'FATFS partition appears blank. Download a backup, click Format, then Save to Flash to initialize it.';
-        appendLog('FATFS partition appears blank/unformatted. Format then save to persist.', '[warn]');
+        appendLog('FATFS partition appears blank/unformatted. Format then save to persist.', '[ESPConnect-Warn]');
       } else {
         throw error;
       }
@@ -1610,7 +1610,7 @@ async function loadFatfsPartition(partition) {
     fatfsState.status = count === 1 ? 'Loaded 1 file.' : `Loaded ${count} files.`;
     appendLog(
       `FATFS partition ${partition.label} loaded (${count} file${count === 1 ? '' : 's'}).`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
   } catch (error) {
     const message = formatErrorMessage(error);
@@ -1706,7 +1706,7 @@ async function handleFatfsBackup() {
     fatfsState.backupDone = true;
     fatfsState.sessionBackupDone = true;
     fatfsState.status = 'Backup downloaded. You can now save changes.';
-    appendLog('FATFS backup downloaded.', '[debug]');
+    appendLog('FATFS backup downloaded.', '[ESPConnect-Debug]');
   } catch (error) {
     const message = formatErrorMessage(error);
     if (message === 'Download cancelled by user') {
@@ -1773,7 +1773,7 @@ async function handleFatfsRestore(file) {
     });
     fatfsState.status = 'FATFS image restored.';
     fatfsState.backupDone = true;
-    appendLog('FATFS partition restored from backup.', '[debug]');
+    appendLog('FATFS partition restored from backup.', '[ESPConnect-Debug]');
     await loadFatfsPartition(partition);
   } catch (error) {
     fatfsState.error = formatErrorMessage(error);
@@ -1843,7 +1843,7 @@ async function handleFatfsUpload({ file }) {
     fatfsState.client.writeFile(targetName, data);
     await refreshFatfsListing();
     markFatfsDirty(`Staged ${targetName}. Remember to Save.`);
-    appendLog(`FATFS staged ${targetName} (${data.length.toLocaleString()} bytes).`, '[debug]');
+    appendLog(`FATFS staged ${targetName} (${data.length.toLocaleString()} bytes).`, '[ESPConnect-Debug]');
   } catch (error) {
     fatfsState.error = formatErrorMessage(error);
     showToast(fatfsState.error, { color: 'error' });
@@ -1870,7 +1870,7 @@ async function handleFatfsDelete(name) {
     fatfsState.client.deleteFile(name);
     await refreshFatfsListing();
     markFatfsDirty(`${name} deleted. Save to persist.`);
-    appendLog(`FATFS staged deletion of ${name}.`, '[debug]');
+    appendLog(`FATFS staged deletion of ${name}.`, '[ESPConnect-Debug]');
   } catch (error) {
     fatfsState.error = formatErrorMessage(error);
   } finally {
@@ -1894,7 +1894,7 @@ async function handleFatfsFormat() {
     fatfsState.client.format();
     await refreshFatfsListing();
     markFatfsDirty('FATFS formatted. Save to apply.');
-    appendLog('FATFS staged format operation.', '[debug]');
+    appendLog('FATFS staged format operation.', '[ESPConnect-Debug]');
   } catch (error) {
     fatfsState.error = formatErrorMessage(error);
   } finally {
@@ -1958,7 +1958,7 @@ async function handleFatfsSave() {
     });
     fatfsState.dirty = false;
     fatfsState.status = 'FATFS saved to flash.';
-    appendLog('FATFS partition updated on flash.', '[debug]');
+    appendLog('FATFS partition updated on flash.', '[ESPConnect-Debug]');
     await loadFatfsPartition(partition);
   } catch (error) {
     fatfsState.error = formatErrorMessage(error);
@@ -2001,7 +2001,7 @@ async function handleFatfsDownloadFile(name) {
   try {
     const data = await readFatfsFile(name);
     saveBinaryFile(name, data);
-    appendLog(`FATFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[debug]');
+    appendLog(`FATFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[ESPConnect-Debug]');
   } catch (error) {
     fatfsState.error = formatErrorMessage(error);
     fatfsState.status = 'FATFS download failed.';
@@ -2381,7 +2381,7 @@ async function loadSpiffsPartition(partition) {
     spiffsState.status = count === 1 ? 'Loaded 1 file.' : `Loaded ${count} files.`;
     appendLog(
       `SPIFFS partition ${partition.label} loaded (${count} file${count === 1 ? '' : 's'}).`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
   } catch (error) {
     const message = formatErrorMessage(error);
@@ -2513,7 +2513,7 @@ async function handleSpiffsBackup() {
     spiffsState.backupDone = true;
     spiffsState.sessionBackupDone = true;
     spiffsState.status = 'Backup downloaded. You can now save changes.';
-    appendLog('SPIFFS backup downloaded.', '[debug]');
+    appendLog('SPIFFS backup downloaded.', '[ESPConnect-Debug]');
   } catch (error) {
     const message = formatErrorMessage(error);
     if (message === 'Download cancelled by user') {
@@ -2565,7 +2565,7 @@ async function handleSpiffsRestore(file) {
     });
     spiffsState.status = 'SPIFFS image restored.';
     spiffsState.backupDone = true;
-    appendLog('SPIFFS partition restored from backup.', '[debug]');
+    appendLog('SPIFFS partition restored from backup.', '[ESPConnect-Debug]');
     await loadSpiffsPartition(partition);
   } catch (error) {
     spiffsState.error = formatErrorMessage(error);
@@ -2584,7 +2584,7 @@ async function handleSpiffsDownloadFile(name) {
   try {
     const data = await spiffsState.client.read(name);
     saveBinaryFile(name, data);
-    appendLog(`SPIFFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[debug]');
+    appendLog(`SPIFFS downloaded ${name} (${data.length.toLocaleString()} bytes).`, '[ESPConnect-Debug]');
   } catch (error) {
     spiffsState.error = formatErrorMessage(error);
   }
@@ -2760,7 +2760,7 @@ async function handleSpiffsUpload({ file }) {
     await spiffsState.client.write(targetName, data);
     await refreshSpiffsListing();
     markSpiffsDirty(`Staged ${targetName}. Remember to Save.`);
-    appendLog(`SPIFFS staged ${targetName} (${data.length.toLocaleString()} bytes).`, '[debug]');
+    appendLog(`SPIFFS staged ${targetName} (${data.length.toLocaleString()} bytes).`, '[ESPConnect-Debug]');
     spiffsState.uploadBlocked = false;
     spiffsState.uploadBlockedReason = '';
   } catch (error) {
@@ -2803,7 +2803,7 @@ async function handleSpiffsDelete(name) {
     await spiffsState.client.remove(name);
     await refreshSpiffsListing();
     markSpiffsDirty(`${name} deleted. Save to persist.`);
-    appendLog(`SPIFFS staged deletion of ${name}.`, '[debug]');
+    appendLog(`SPIFFS staged deletion of ${name}.`, '[ESPConnect-Debug]');
   } catch (error) {
     spiffsState.error = formatErrorMessage(error);
   } finally {
@@ -2827,7 +2827,7 @@ async function handleSpiffsFormat() {
     await spiffsState.client.format();
     await refreshSpiffsListing();
     markSpiffsDirty('SPIFFS formatted. Save to apply.');
-    appendLog('SPIFFS staged format operation.', '[debug]');
+    appendLog('SPIFFS staged format operation.', '[ESPConnect-Debug]');
   } catch (error) {
     spiffsState.error = formatErrorMessage(error);
   } finally {
@@ -2891,7 +2891,7 @@ async function handleSpiffsSave() {
     });
     spiffsState.dirty = false;
     spiffsState.status = 'SPIFFS saved to flash.';
-    appendLog('SPIFFS partition updated on flash.', '[debug]');
+    appendLog('SPIFFS partition updated on flash.', '[ESPConnect-Debug]');
     await loadSpiffsPartition(partition);
   } catch (error) {
     spiffsState.error = formatErrorMessage(error);
@@ -3569,7 +3569,7 @@ async function setConnectionBaud(targetBaud, options = {}) {
     try {
       baudChangeBusy.value = true;
       if (log) {
-        appendLog('Changing baud to ' + parsed.toLocaleString() + ' bps...', '[debug]');
+        appendLog('Changing baud to ' + parsed.toLocaleString() + ' bps...', '[ESPConnect-Debug]');
       }
       loader.value.baudrate = parsed;
       await loader.value.changeBaud(parsed);
@@ -3577,11 +3577,11 @@ async function setConnectionBaud(targetBaud, options = {}) {
         transport.value.baudrate = parsed;
       }
       if (log) {
-        appendLog('Baud changed to ' + parsed.toLocaleString() + ' bps.', '[debug]');
+        appendLog('Baud changed to ' + parsed.toLocaleString() + ' bps.', '[ESPConnect-Debug]');
       }
     } catch (error) {
       if (log) {
-        appendLog('Baud change failed: ' + (error?.message || error), '[warn]');
+        appendLog('Baud change failed: ' + (error?.message || error), '[ESPConnect-Warn]');
       }
       throw error;
     } finally {
@@ -3612,7 +3612,7 @@ watch(selectedBaud, async (value, oldValue) => {
   }
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
-    appendLog('Ignoring invalid baud selection: ' + value, '[warn]');
+    appendLog('Ignoring invalid baud selection: ' + value, '[ESPConnect-Warn]');
     if (oldValue != null) {
       const previousSuspendState = suspendBaudWatcher;
       suspendBaudWatcher = true;
@@ -3642,7 +3642,7 @@ watch(selectedBaud, async (value, oldValue) => {
   if (busy.value || flashInProgress.value || maintenanceBusy.value || baudChangeBusy.value || monitorActive.value) {
     appendLog(
       'Cannot change baud while operations are running. Keeping ' + currentBaud.value.toLocaleString() + ' bps.',
-      '[warn]'
+      '[ESPConnect-Warn]'
     );
     const previousSuspendState = suspendBaudWatcher;
     suspendBaudWatcher = true;
@@ -4595,7 +4595,7 @@ const showSerialMonitorReconnectNotice = computed(
   () => serialMonitorClosedPrompt.value && !connected.value && serialSupported
 );
 
-function appendLog(message, prefix = '[ui]') {
+function appendLog(message, prefix = '[ESPConnect-ui]') {
   const line = prefix ? `${prefix} ${message}` : message;
   logBuffer.value += `${line}\n`;
 }
@@ -4701,12 +4701,12 @@ async function releaseTransportReader() {
   try {
     await reader.cancel();
   } catch (err) {
-    appendLog(`Monitor reader cancel failed: ${err?.message || err}`, '[debug]');
+    appendLog(`Monitor reader cancel failed: ${err?.message || err}`, '[ESPConnect-Debug]');
   }
   try {
     reader.releaseLock?.();
   } catch (err) {
-    appendLog(`Monitor reader release failed: ${err?.message || err}`, '[debug]');
+    appendLog(`Monitor reader release failed: ${err?.message || err}`, '[ESPConnect-Debug]');
   }
   transportInstance.reader = null;
 }
@@ -4778,7 +4778,7 @@ async function handleSerialDisconnectEvent(event) {
   if (!currentPort.value && !transport.value) {
     return;
   }
-  appendLog('Serial device disconnected from USB. Cleaning up connection.', '[warn]');
+  appendLog('Serial device disconnected from USB. Cleaning up connection.', '[ESPConnect-Warn]');
   if (busy.value) {
     await disconnectTransport();
     busy.value = false;
@@ -4809,7 +4809,7 @@ async function startMonitor() {
     return;
   }
   if (!transport.value) {
-    appendLog('Monitor unavailable: transport not ready.', '[warn]');
+    appendLog('Monitor unavailable: transport not ready.', '[ESPConnect-Warn]');
     return;
   }
   previousMonitorBaud.value = currentBaud.value || lastFlashBaud.value || DEFAULT_FLASH_BAUD;
@@ -4819,13 +4819,13 @@ async function startMonitor() {
     } catch (error) {
       appendLog(
         `Continuing monitor at ${currentBaud.value.toLocaleString()} bps (switch failed: ${error?.message || error}).`,
-        '[warn]'
+        '[ESPConnect-Warn]'
       );
     }
   }
   if (!monitorAutoResetPerformed) {
     await releaseTransportReader();
-    appendLog('Auto-resetting board before starting serial monitor output.', '[debug]');
+    appendLog('Auto-resetting board before starting serial monitor output.', '[ESPConnect-Debug]');
     await resetBoard({ silent: true });
     monitorAutoResetPerformed = true;
   }
@@ -4839,14 +4839,14 @@ async function startMonitor() {
   const controller = new AbortController();
   monitorAbortController.value = controller;
   monitorActive.value = true;
-  appendLog('Serial monitor started.', '[debug]');
+  appendLog('Serial monitor started.', '[ESPConnect-Debug]');
   (async () => {
     try {
       await monitorLoop(controller.signal);
     } catch (err) {
       if (!controller.signal.aborted) {
         monitorError.value = err?.message || String(err);
-        appendLog(`Monitor error: ${monitorError.value}`, '[warn]');
+        appendLog(`Monitor error: ${monitorError.value}`, '[ESPConnect-Warn]');
       }
     } finally {
       if (monitorAbortController.value === controller) {
@@ -4875,7 +4875,7 @@ async function stopMonitor(options = {}) {
     }
     monitorDecoder = null;
   }
-  appendLog('Serial monitor stopped.', '[debug]');
+  appendLog('Serial monitor stopped.', '[ESPConnect-Debug]');
   const restoreBaud =
     previousMonitorBaud.value || lastFlashBaud.value || DEFAULT_FLASH_BAUD;
   if (restoreBaud && restoreBaud !== currentBaud.value) {
@@ -4884,7 +4884,7 @@ async function stopMonitor(options = {}) {
     } catch (error) {
       appendLog(
         `Failed to restore baud rate (${error?.message || error}). Remaining at ${currentBaud.value.toLocaleString()} bps.`,
-        '[warn]'
+        '[ESPConnect-Warn]'
       );
     }
   }
@@ -4897,12 +4897,12 @@ async function stopMonitor(options = {}) {
 async function resetBoard(options = {}) {
   const { silent = false } = options;
   if (!transport.value) {
-    appendLog('Cannot reset: transport not available.', '[warn]');
+    appendLog('Cannot reset: transport not available.', '[ESPConnect-Warn]');
     return;
   }
   try {
     if (!silent) {
-      appendLog('Resetting board (toggle RTS).', '[debug]');
+      appendLog('Resetting board (toggle RTS).', '[ESPConnect-Debug]');
     }
     await transport.value.setDTR(false);
     await transport.value.setRTS(true);
@@ -4995,12 +4995,12 @@ async function connect() {
     const chipName = await loader.value.main();
     const chip = loader.value.chip;
     connected.value = true;
-    appendLog(`Handshake complete with ${chipName}. Collecting device details...`, '[debug]');
+    appendLog(`Handshake complete with ${chipName}. Collecting device details...`, '[ESPConnect-Debug]');
     if (chip?.CHIP_NAME === 'ESP32-C6' && chip.SPI_REG_BASE === 0x60002000) {
       chip.SPI_REG_BASE = 0x60003000;
       appendLog(
         'Applied ESP32-C6 SPI register base workaround (0x60002000 → 0x60003000).',
-        '[debug]'
+        '[ESPConnect-Debug]'
       );
     }
 
@@ -5016,7 +5016,7 @@ async function connect() {
       } catch (error) {
         appendLog(
           `Fast baud negotiation failed (${error?.message || error}). Staying at ${connectBaud.toLocaleString()} bps.`,
-          '[warn]'
+          '[ESPConnect-Warn]'
         );
         lastFlashBaud.value = connectBaud;
         const previousSuspendState = suspendBaudWatcher;
@@ -5037,11 +5037,11 @@ async function connect() {
           const result = await fn.call(chip, loader.value);
           appendLog(
             `Chip ${method}: ${result === undefined ? 'undefined' : JSON.stringify(result)}`,
-            '[debug]'
+            '[ESPConnect-Debug]'
           );
           return result;
         } catch (err) {
-          appendLog(`Unable to retrieve ${method}: ${err?.message || err}`, '[warn]');
+          appendLog(`Unable to retrieve ${method}: ${err?.message || err}`, '[ESPConnect-Warn]');
           return undefined;
         }
       }
@@ -5059,17 +5059,17 @@ async function connect() {
         flashSizeRaw = await loader.value.detectFlashSize();
         appendLog(
           `Chip detectFlashSize: ${flashSizeRaw === undefined ? 'undefined' : JSON.stringify(flashSizeRaw)}`,
-          '[debug]'
+          '[ESPConnect-Debug]'
         );
       } else if (typeof loader.value.getFlashSize === 'function') {
         flashSizeRaw = await loader.value.getFlashSize();
         appendLog(
           `Chip getFlashSize: ${flashSizeRaw === undefined ? 'undefined' : JSON.stringify(flashSizeRaw)}`,
-          '[debug]'
+          '[ESPConnect-Debug]'
         );
       }
     } catch (err) {
-      appendLog(`Unable to retrieve flash size: ${err?.message || err}`, '[warn]');
+      appendLog(`Unable to retrieve flash size: ${err?.message || err}`, '[ESPConnect-Warn]');
       flashSizeRaw = undefined;
     }
 
@@ -5102,7 +5102,7 @@ async function connect() {
             : '??'}, cap=0x${Number.isInteger(capacityCodeRaw)
               ? capacityCodeRaw.toString(16).toUpperCase().padStart(2, '0')
               : '??'})`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
 
     const featureList = Array.isArray(featuresRaw)
@@ -5151,7 +5151,7 @@ async function connect() {
                 ?.toString(16)
                 .padStart(6, '0')
                 .toUpperCase()}.`,
-            '[warn]'
+            '[ESPConnect-Warn]'
           );
           break;
         }
@@ -5170,7 +5170,7 @@ async function connect() {
               .toUpperCase()} -> 0x${mappedCapacityCode
                 .toString(16)
                 .toUpperCase()} (${formatBytes(fallbackFlashBytes)}).`,
-            '[warn]'
+            '[ESPConnect-Warn]'
           );
         }
       }
@@ -5187,7 +5187,7 @@ async function connect() {
           .toUpperCase()} (manuf=0x${toHexByte(manufacturerCode)}, type=0x${toHexByte(
             memoryTypeCode
           )}, cap=0x${toHexByte(capacityCodeRaw)}).`,
-        '[warn]'
+        '[ESPConnect-Warn]'
       );
     }
 
@@ -5305,7 +5305,7 @@ async function connect() {
     activeTab.value = 'info';
     appendLog(
       `Loaded device details: ${chipDetails.value.name}, ${orderedFacts.length} facts.`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
 
     connected.value = true;
@@ -5323,7 +5323,7 @@ async function connect() {
     await disconnectTransport();
   } finally {
     busy.value = false;
-    appendLog(`Connect flow finished (busy=${busy.value}).`, '[debug]');
+    appendLog(`Connect flow finished (busy=${busy.value}).`, '[ESPConnect-Debug]');
   }
 }
 
@@ -5365,7 +5365,7 @@ function parseNumericInput(value, label) {
 
 async function flashFirmware() {
   if (!loader.value || !firmwareBuffer.value) {
-    appendLog('Select a firmware binary and connect to a device first.', '[warn]');
+    appendLog('Select a firmware binary and connect to a device first.', '[ESPConnect-Warn]');
     return;
   }
   if (flashInProgress.value || busy.value) return;
@@ -5396,7 +5396,7 @@ async function flashFirmware() {
     destructive: true,
   });
   if (!confirmFlash) {
-    appendLog('Firmware flash cancelled by user.', '[warn]');
+    appendLog('Firmware flash cancelled by user.', '[ESPConnect-Warn]');
     return;
   }
 
@@ -5446,7 +5446,7 @@ async function flashFirmware() {
     appendLog(`Flashing complete in ${elapsed}s. Device rebooted.`);
   } catch (error) {
     if (error?.message === 'Flash cancelled by user') {
-      appendLog('Flash cancelled by user.', '[warn]');
+      appendLog('Flash cancelled by user.', '[ESPConnect-Warn]');
     } else {
       appendLog(`Flashing failed: ${error?.message || error}`, '[error]');
     }
@@ -5507,7 +5507,7 @@ function handleSelectRegister(address) {
     registerStatus.value = guide.description
       ? `${guide.label}: ${guide.description}`
       : `${guide.label} selected.`;
-    appendLog(`Quick-selected register ${guide.label} (${guide.address}).`, '[debug]');
+    appendLog(`Quick-selected register ${guide.label} (${guide.address}).`, '[ESPConnect-Debug]');
   }
 }
 
@@ -5553,7 +5553,7 @@ async function handleWriteRegister() {
       .toUpperCase()}.`;
     appendLog(
       `Register write completed at 0x${address.toString(16).toUpperCase()} = ${registerReadResult.value}.`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
   } catch (error) {
     registerStatusType.value = 'error';
@@ -5586,7 +5586,7 @@ async function handleComputeMd5() {
     md5Result.value = result;
     appendLog(
       `Computed MD5 for 0x${offset.toString(16).toUpperCase()} (${length} bytes): ${result}`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
   } catch (error) {
     md5StatusType.value = 'error';
@@ -5640,7 +5640,7 @@ async function downloadFlashRegion(offset, length, options = {}) {
     DEFAULT_ROM_BAUD;
   const baudNumber = Number.isFinite(activeBaudRaw) ? activeBaudRaw : DEFAULT_ROM_BAUD;
   const baudLabel = baudNumber.toLocaleString() + ' bps';
-  appendLog('Downloading ' + displayLabel + ' at ' + baudLabel + '.', '[debug]');
+  appendLog('Downloading ' + displayLabel + ' at ' + baudLabel + '.', '[ESPConnect-Debug]');
 
   const CANCEL_ERROR_MESSAGE = 'Download cancelled by user';
   const MAX_CHUNK_SIZE = 0x10000;
@@ -5802,7 +5802,7 @@ async function downloadFlashRegion(offset, length, options = {}) {
   }
   appendLog(
     'Downloaded ' + displayLabel + ' to ' + finalName + ' @ ' + baudLabel + '.',
-    '[debug]'
+    '[ESPConnect-Debug]'
   );
   return finalName;
 }
@@ -5972,7 +5972,7 @@ function handleCancelFlash() {
   if (!flashCancelRequested.value) {
     flashCancelRequested.value = true;
     flashProgressDialog.label = 'Stopping flash...';
-    appendLog('Flash cancellation requested by user.', '[warn]');
+    appendLog('Flash cancellation requested by user.', '[ESPConnect-Warn]');
   }
 }
 
@@ -6012,10 +6012,10 @@ function handleSelectIntegrityPartition(value) {
     md5StatusType.value = 'info';
     appendLog(
       `Flash integrity region set to ${option.baseLabel} (${option.offsetHex}, ${md5Length.value}).`,
-      '[debug]'
+      '[ESPConnect-Debug]'
     );
   } else if (value == null) {
-    appendLog('Flash integrity partition selection cleared.', '[debug]');
+    appendLog('Flash integrity partition selection cleared.', '[ESPConnect-Debug]');
   } else {
     md5StatusType.value = 'warning';
     md5Status.value = 'Selected partition is unavailable.';
@@ -6048,7 +6048,7 @@ async function handleEraseFlash(payload = { mode: 'full' }) {
   if (!confirmErase) {
     flashReadStatusType.value = 'info';
     flashReadStatus.value = 'Flash erase cancelled.';
-    appendLog('Flash erase cancelled by user.', '[warn]');
+    appendLog('Flash erase cancelled by user.', '[ESPConnect-Warn]');
     return;
   }
 
@@ -6059,7 +6059,7 @@ async function handleEraseFlash(payload = { mode: 'full' }) {
     await loader.value.eraseFlash();
     flashReadStatusType.value = 'success';
     flashReadStatus.value = 'Flash erase complete.';
-    appendLog('Entire flash erased.', '[debug]');
+    appendLog('Entire flash erased.', '[ESPConnect-Debug]');
   } catch (error) {
     flashReadStatusType.value = 'error';
     flashReadStatus.value = `Erase failed: ${error?.message || error}`;
