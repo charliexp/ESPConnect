@@ -4749,7 +4749,7 @@ async function connect() {
     const flashLabel =
       flashBytesValue && flashBytesValue > 0
         ? `${formatBytes(flashBytesValue)}${flashLabelSuffix}`
-        : null;
+        : 'Flash size not detected';
     const crystalLabel =
       typeof crystalFreq === 'number' ? `${Number(crystalFreq).toFixed(0)} MHz` : null;
     const macLabel = macAddress || 'Unavailable';
@@ -4773,6 +4773,7 @@ async function connect() {
       pushFact('Package Form Factor', detail);
     }
     pushFact('Revision', resolveRevisionLabel(chipKey, chipRevision, majorVersion, minorVersion));
+    pushFact('Flash Size', flashLabel);
 
     const embeddedFlash = resolveEmbeddedFlash(chipKey, flashCap, flashVendor, featureList);
     pushFact('Embedded Flash', embeddedFlash);
