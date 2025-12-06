@@ -2248,20 +2248,6 @@ function formatBytes(bytes) {
   return `${formatted} ${units[idx]}`;
 }
 
-// Format a frequency value with SI prefixes.
-function formatHertz(value) {
-  if (!Number.isFinite(value) || value <= 0) return null;
-  const units = ['Hz', 'kHz', 'MHz'];
-  let idx = 0;
-  let v = value;
-  while (v >= 1000 && idx < units.length - 1) {
-    v /= 1000;
-    idx += 1;
-  }
-  const formatted = v % 1 === 0 ? v.toFixed(0) : v.toFixed(v < 10 ? 2 : 1);
-  return `${formatted} ${units[idx]}`;
-}
-
 // Normalize different error shapes to a readable message.
 function formatErrorMessage(error) {
   if (!error) {
