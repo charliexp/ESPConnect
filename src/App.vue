@@ -5140,8 +5140,9 @@ async function connect() {
     lastFlashBaud.value = desiredBaud;
     const portDetails = currentPort.value?.getInfo ? currentPort.value.getInfo() : null;
     const usbBridge = portDetails ? formatUsbBridge(portDetails) : "Unknown";
-    if (usbBridge && /ch340/i.test(usbBridge) && desiredBaud > 460800) {
-      desiredBaud = 460800;
+    const bridge = getUsbDeviceInfo(portDetails.usbVendorId, portDetails.usbProductId);
+    if (bridge.productName === 'CH340') {
+      desiredBaud = bridge.maxBaudrate;
       lastFlashBaud.value = desiredBaud;
       const previousSuspendState = suspendBaudWatcher;
       suspendBaudWatcher = true;
@@ -5149,8 +5150,8 @@ async function connect() {
       queueMicrotask(() => {
         suspendBaudWatcher = previousSuspendState;
       });
-      showToast('Detected CH340 bridge; lowering baud to 460,800 for stability.', { color: 'warning' });
-      appendLog('Detected CH340 bridge; lowering baud to 460,800 bps.', '[ESPConnect-Debug]');
+      showToast('Detected CH340 bridge; lowering baud to '+desiredBaud+' bps for stability.', { color: 'warning' });
+      appendLog('Detected CH340 bridge; lowering baud to '+desiredBaud+' bps.', '[ESPConnect-Debug]');
     }
 
     const esptool = createEsptoolClient({
