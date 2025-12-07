@@ -43,7 +43,7 @@
           :disabled="busy || flashInProgress || maintenanceBusy || baudChangeBusy || monitorActive" />
         <span v-if="higherBaudrateAvailable">
 
-          <v-tooltip text="A higher baudrate can be used"  location="bottom">
+          <v-tooltip text="A higher baudrate can be used" location="bottom">
             <template v-slot:activator="{ props }">
               <v-btn class="text-none" stacked v-bind="props">
                 <v-badge bordered color="success" dot>
@@ -646,14 +646,6 @@ import {
   FATFS_DEFAULT_BLOCK_SIZE,
 } from './constants/filesystems';
 import {
-  DEFAULT_FLASH_BAUD,
-  DEFAULT_ROM_BAUD,
-  MONITOR_BAUD,
-  MAX_SUPPORTED_BAUDRATE,
-  SUPPORTED_BAUDRATES,
-  TIMEOUT_CONNECT,
-} from './constants/serial';
-import {
   APP_DESCRIPTOR_LENGTH,
   APP_DESCRIPTOR_MAGIC,
   APP_IMAGE_HEADER_MAGIC,
@@ -667,7 +659,14 @@ import {
 } from './constants/app';
 import { PACKAGE_LABELS, ECO_LABELS, EMBEDDED_FLASH_CAPACITY, EMBEDDED_PSRAM_CAPACITY, PACKAGE_FORM_FACTORS } from './constants/chipLabels';
 import { JEDEC_FLASH_PARTS, JEDEC_MANUFACTURERS, VENDOR_ALIASES } from './constants/flashIds';
-import { getUsbDeviceInfo } from './constants/usb';
+import {
+  getUsbDeviceInfo, DEFAULT_FLASH_BAUD,
+  DEFAULT_ROM_BAUD,
+  MONITOR_BAUD,
+  MAX_SUPPORTED_BAUDRATE,
+  SUPPORTED_BAUDRATES,
+  TIMEOUT_CONNECT,
+} from './constants/usb';
 import { FACT_DISPLAY_ORDER, FACT_GROUP_CONFIG, FACT_ICONS } from './constants/deviceFacts';
 import { findChipDocs } from './constants/chipDocsLinks';
 import { PWM_TABLE } from './utils/pwm-capabilities-table';

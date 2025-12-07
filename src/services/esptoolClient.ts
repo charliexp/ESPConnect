@@ -21,7 +21,7 @@ import {
   timeoutPerMb,
 } from 'tasmota-webserial-esptool/dist/const.js';
 import { pack } from 'tasmota-webserial-esptool/dist/struct.js';
-import { DEBUG_SERIAL, DEFAULT_ROM_BAUD } from '../constants/serial';
+import { DEBUG_SERIAL, DEFAULT_ROM_BAUD } from '../constants/usb';
 import { readEsp32S3Metadata } from './chipMetadata/esp32s3';
 import { readEsp32S2Metadata } from './chipMetadata/esp32s2';
 import { readEsp32C3Metadata } from './chipMetadata/esp32c3';
