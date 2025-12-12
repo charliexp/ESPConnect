@@ -5171,6 +5171,7 @@ async function connect() {
       appendLog('Detected CH340 bridge; lowering baud to ' + desiredBaud + ' bps.', '[ESPConnect-Debug]');
     }
 
+    // Create the client to communicate and do operations on the MCU
     const esptool = createEsptoolClient({
       port: currentPort.value,
       terminal,
@@ -5187,6 +5188,7 @@ async function connect() {
     currentBaud.value = connectBaud_defaultROM;
     transport.value.baudrate = connectBaud_defaultROM;
 
+    // Flush any input remaining on the transport
     try {
       await transport.value.flushInput();
       appendLog('Serial input flushed before handshake.', '[ESPConnect-Debug]');
