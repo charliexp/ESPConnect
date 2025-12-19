@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.12
+- Filesystem backups now reuse the last partition read (avoids re-downloading the same flash region twice) ([issue #51](https://github.com/thelastoutpostworkshop/ESPConnect/issues/51)).
+- Moved WASM modules from public/ to src/ to ensure proper Vite module handling and eliminate dev/build import errors.
+- Renamed "Download used flash" to "Download flash backup" in Flash Tools.
+
 ## 1.0.11
 - Added standalone electron app in release assets by Jason2866 ([PR #56](https://github.com/thelastoutpostworkshop/ESPConnect/pull/56)).
 - Fixed filesystem image flashing to pass an `ArrayBuffer` into `flashData` (avoids `ArrayBufferLike` / `SharedArrayBuffer` TypeScript warnings).
