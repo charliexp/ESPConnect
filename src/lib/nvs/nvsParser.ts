@@ -294,15 +294,19 @@ function detectNvsVersionFromPages(data: Uint8Array) {
     const pageStart = pageIndex * PAGE_SIZE;
     const page = data.subarray(pageStart, Math.min(pageStart + PAGE_SIZE, data.length));
     if (page.length < HEADER_SIZE) continue;
-    checkedPages += 1;
 
     const view = new DataView(page.buffer, page.byteOffset, page.byteLength);
     const state = readUint32Le(view, 0);
     const versionByte = view.getUint8(8);
 
+    // Skip blank pages entirely (do not count them)
     if (state === PAGE_STATE.UNINITIALIZED) {
       continue;
     }
+
+    // Only count real pages
+    checkedPages += 1;
+
 
     const stored = readUint32Le(view, 28);
     const calc = nvsCrc32(page, 4, 24);
@@ -982,7 +986,13 @@ export function parseNvsPartition(data: Uint8Array): NvsParseResult {
   const detected = detectNvsVersion(data);
   if (detected.version === 1 || detected.version === 2) {
     const result = parseWithVersion(data, detected.version);
-    if (detected.reason) result.warnings.unshift(detected.reason);
+    if (
+      detected.reason &&
+      (detected.reason.startsWith('Mixed page versions') || detected.version === 0)
+    ) {
+      result.warnings.unshift(detected.reason);
+    }
+
     return result;
   }
 
