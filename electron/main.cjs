@@ -34,14 +34,31 @@ function createWindow() {
     autoHideMenuBar: false,
   });
 
-  // Load the index.html from the dist folder (after Vite build)
   const indexPath = path.join(__dirname, '..', 'dist', 'index.html');
-  
-  if (fs.existsSync(indexPath)) {
+  const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173';
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+  if (isDev) {
+    mainWindow.loadURL(devServerUrl).catch((error) => {
+      console.warn(
+        `[ESPConnect] Failed to load Vite dev server at ${devServerUrl}; falling back to built assets if available.`,
+        error
+      );
+
+      if (fs.existsSync(indexPath)) {
+        return mainWindow.loadFile(indexPath);
+      }
+
+      dialog.showErrorBox(
+        'ESPConnect',
+        `Could not load the Vite dev server at ${devServerUrl}.\n\nStart it with: npm run dev`
+      );
+      app.quit();
+    });
+  } else if (fs.existsSync(indexPath)) {
     mainWindow.loadFile(indexPath);
   } else {
-    // Fallback to development server
-    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.loadURL(devServerUrl);
   }
 
   // Open DevTools in development
