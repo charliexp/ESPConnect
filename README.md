@@ -48,7 +48,7 @@ ESPConnect is a browser-based control center for ESP32- and ESP8266-class boards
 - **Serial Monitor tab** – stream UART output, send commands, clear the console, change baud rate, or reset the board right from the browser.  
 - **Session Log tab** – chronological ledger of connects, flashes, downloads, and warnings. Clear it whenever you want a clean slate.
 
-### 🧪 NVS Inspector (Experimental)
+#### NVS Inspector (🧪 Experimental)
 
 ESPConnect includes an **experimental NVS Inspector** that lets you **read and visualize** the contents of an ESP32’s NVS (Non-Volatile Storage) partition directly from the browser.
 
