@@ -5,6 +5,7 @@
 ### Fixed
 - LittleFS uploads now use `client.getUsage()`
 - Serial Monitor: stopping the monitor now returns to maintenance mode (ROM bootloader + stub); use Disconnect to fully close the port.
+- Fix when lowering the baudrate automatically in the serial monitor for Native USB (0x1001) 
 
 ### Internal
 - Refactor components to TypeScript
