@@ -4705,7 +4705,7 @@ const partitionPalette = [
   '#ffc6ff',
 ];
 
-const UNUSED_FLASH_ALERT_THRESHOLD = 64 * 1024;
+const UNUSED_FLASH_ALERT_THRESHOLD = 500 * 1024;
 
 const PARTITION_TYPE_NAMES: Record<number, string> = {
   0x00: 'Application',
