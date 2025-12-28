@@ -5765,8 +5765,18 @@ async function connect() {
       '[ESPConnect-Debug]'
     );
 
-    const flashId = await client.loader.flashId();
-    const id = Number.isFinite(flashId) ? flashId : null;
+    let flashId: number | null = null;
+    let id: number | null = null;
+    try {
+      const detectedFlashId = await client.loader.flashId();
+      flashId = detectedFlashId;
+      id = Number.isFinite(detectedFlashId) ? detectedFlashId : null;
+    } catch (error) {
+      appendLog(
+        `Warning: unable to read flash ID (${formatErrorMessage(error)}).`,
+        '[ESPConnect-Warn]'
+      );
+    }
 
     const manufacturerCode = id !== null ? id & 0xff : null;
     const memoryTypeCode = id !== null ? (id >> 8) & 0xff : null;
