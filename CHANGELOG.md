@@ -1,8 +1,10 @@
 # Changelog
 
-## 1.1.4-preview-3
+## 1.1.4-preview-4
 ### Improvement
 - Fat filesystem now supports folders
+- Automatically detect the browser language: On the first visit, it automatically matches the supported language (en, fr, zh) based on the browser settings by MeatSuger
+ ([PR #96](https://github.com/thelastoutpostworkshop/ESPConnect/pull/96)).
 - Serial monitor start button now shows a loading indicator while the monitor is being initialized
 - Delay removed for the connection dialog
 - Connect dialog now displays localized status updates while the bootloader workflow runs
@@ -10,6 +12,8 @@
 - Fixed error in the Serial Monitor component when clearing the filter output
 ### Internal
 - Added Vitest to fatfs fixture
+### New Contributors
+- [MeatSuger](https://github.com/MeatSuger) made their first contribution in ([PR #96](https://github.com/thelastoutpostworkshop/ESPConnect/pull/96))
 ## 1.1.3
 ### Improvement
 - Session log now shows the version of tasmota-webserial-esptool package along with a timestamp
