@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { detectNvsVersion, parseNvsPartition } from './nvsParser';
 
@@ -27,6 +27,16 @@ const CRC32_TABLE = (() => {
   }
   return table;
 })();
+
+let consoleDebugSpy: ReturnType<typeof vi.spyOn>;
+
+beforeAll(() => {
+  consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  consoleDebugSpy.mockRestore();
+});
 
 function crc32Update(crc: number, data: Uint8Array, start = 0, length = data.length - start) {
   let c = crc >>> 0;

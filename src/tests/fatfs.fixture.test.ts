@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -22,8 +22,10 @@ const NESTED_FILE = `${FAT_MOUNT}/fat_dir/nested_info.txt`;
 const createFixtureFatFS = async () => createFatFSFromImage(new Uint8Array(fixtureImage), { wasmURL });
 
 let originalFetch: typeof fetch;
+let consoleInfoSpy: ReturnType<typeof vi.spyOn>;
 
 beforeAll(() => {
+  consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
   originalFetch = globalThis.fetch;
   globalThis.fetch = async (input, init) => {
     const url = input instanceof URL ? input : typeof input === 'string' ? new URL(input) : new URL(input.url);
@@ -44,6 +46,7 @@ beforeAll(() => {
 
 afterAll(() => {
   globalThis.fetch = originalFetch;
+  consoleInfoSpy.mockRestore();
 });
 
 describe('fatfs fixture image', () => {
