@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.4-preview-4
+## 1.1.4
 ### Improvement
 - Fat filesystem now supports folders
 - Automatically detect the browser language: On the first visit, it automatically matches the supported language (en, fr, zh) based on the browser settings by MeatSuger
